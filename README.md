@@ -84,9 +84,15 @@ This project automatically creates a custom subdomain using your **repository na
 
 ### Terraform Configuration
 
-The custom domain is configured in Terraform and a `CNAME` file is automatically generated in the `app/` directory. When you apply Terraform, it will:
-1. Configure GitHub Pages with the custom domain
-2. Generate the `CNAME` file in your app directory
+Terraform automatically handles the custom domain setup:
+1. **Configures GitHub Pages** with the custom domain (sets it in repository settings automatically)
+2. **CNAME file is generated during deployment** (not committed to git for security) - see below
+
+**No manual configuration needed in GitHub Pages settings** - Terraform does it for you when you apply!
+
+**Security Note:** The CNAME file is generated dynamically during GitHub Actions deployment and is not committed to the repository. You need to set a repository variable:
+- Go to: Repository Settings → Secrets and variables → Actions → Variables
+- Add variable: `BASE_DOMAIN` with your base domain (e.g., `example.com`)
 
 ### DNS Configuration
 
@@ -110,10 +116,13 @@ After applying Terraform, you need to configure DNS with your domain registrar:
 
 3. **Wait for DNS propagation** (usually 5-60 minutes)
 
-4. **Enable HTTPS in GitHub**:
+4. **Enable HTTPS in GitHub** (after DNS propagates):
    - Go to your repository → Settings → Pages
-   - Under "Custom domain", check "Enforce HTTPS"
-   - GitHub will automatically provision an SSL certificate
+   - Under "Custom domain", you should see your domain (e.g., `techelskrepo.example.com`) already configured ✅
+   - Check the box for **"Enforce HTTPS"**
+   - GitHub will automatically provision an SSL certificate (may take a few minutes to 24 hours)
+
+**Note:** Terraform automatically added the custom domain to GitHub Pages settings. You only need to manually enable HTTPS after DNS is configured.
 
 ### Testing
 
@@ -124,6 +133,34 @@ The default GitHub Pages URL will still work, but GitHub will automatically redi
 
 ### Troubleshooting
 
+#### 404 Error: "There isn't a GitHub Pages site here"
+
+If you see a 404 error, check these steps:
+
+1. **Verify Pages Source is set to "GitHub Actions"**:
+   - Go to repository → Settings → Pages
+   - Under "Source", it should say **"GitHub Actions"** (not "Deploy from a branch")
+   - If it's set to a branch, you need to change it:
+     - Click on the source dropdown
+     - Select "GitHub Actions" (if not available, the deploy workflow needs to run first)
+
+2. **Check that the deployment workflow ran successfully**:
+   - Go to repository → Actions tab
+   - Look for "Deploy static content to Pages" workflow
+   - Make sure it completed successfully (green checkmark)
+   - If it failed, check the logs and fix any errors
+
+3. **Ensure the CNAME file exists**:
+   - After Terraform runs, a `CNAME` file should be created in the `app/` directory
+   - This file will be included in the deployment automatically
+   - Verify it contains your custom domain (e.g., `techelskrepo.example.com`)
+
+4. **Trigger a new deployment**:
+   - Make a small change and push to `main` branch, OR
+   - Go to Actions → "Deploy static content to Pages" → Run workflow (manual trigger)
+
+#### Other Common Issues
+
 - **DNS not resolving**: Wait a few minutes for DNS propagation, or check your DNS settings
 - **SSL certificate pending**: This can take up to 24 hours after DNS is configured
-- **404 errors**: Make sure the `CNAME` file exists in your `app/` directory and contains the correct domain
+- **Custom domain not showing in Pages settings**: Run Terraform apply to configure it automatically

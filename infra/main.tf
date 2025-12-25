@@ -8,17 +8,17 @@ resource "github_repository" "site" {
   description = "Terraform + GitHub Pages demo"
   visibility  = "public"
 
+  # Configure custom domain for GitHub Pages
+  # Note: When using GitHub Actions deployment, the source branch here is ignored
+  # but we still need it for Terraform. The actual deployment is handled by .github/workflows/deploy.yml
   pages {
     source {
-      branch = "main"
+      branch = "gh-pages"
       path   = "/"
     }
     cname = local.custom_domain
   }
 }
 
-# Generate CNAME file for GitHub Pages custom domain
-resource "local_file" "cname" {
-  content  = local.custom_domain
-  filename = "${path.module}/../app/CNAME"
-}
+# Note: CNAME file is generated during GitHub Actions deployment
+# (see .github/workflows/deploy.yml) to avoid committing it to git

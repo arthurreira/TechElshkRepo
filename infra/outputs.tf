@@ -15,7 +15,7 @@ output "custom_domain_url" {
 
 output "github_pages_url" {
   description = "Default GitHub Pages URL"
-  value       = "https://arthurreira.github.io/${var.repo_name}/"
+  value       = "https://your-username.github.io/${var.repo_name}/"
 }
 
 output "dns_instructions" {
@@ -24,7 +24,7 @@ output "dns_instructions" {
     Configure DNS with your registrar:
     - Type: CNAME
     - Name: ${split(".", local.custom_domain)[0]}
-    - Value: arthurreira.github.io
+    - Value: your-username.github.io
     
     After DNS propagates, enable HTTPS in GitHub Pages settings.
   EOT

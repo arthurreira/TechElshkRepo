@@ -31,14 +31,29 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      
+      - name: Generate CNAME file
+        run: |
+          # Generate CNAME file dynamically during deployment
+          # Avoids committing sensitive domain information to git
+          # Uses repository variable BASE_DOMAIN (set in repo Settings → Secrets and variables → Actions → Variables)
+          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')
+          BASE_DOMAIN="${{ vars.BASE_DOMAIN }}"
+          if [ -z "$BASE_DOMAIN" ]; then
+            echo "Error: BASE_DOMAIN repository variable is not set"
+            echo "Please set it in: Repository Settings → Secrets and variables → Actions → Variables"
+            exit 1
+          fi
+          echo "${REPO_NAME}.${BASE_DOMAIN}" > app/CNAME
+          echo "Generated CNAME: ${REPO_NAME}.${BASE_DOMAIN}"
+      
       - name: Setup Pages
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload only the static site from app/
+          # Upload static site from app/ (CNAME generated above)
           path: './app'
       - name: Deploy to GitHub Pages
         id: deployment

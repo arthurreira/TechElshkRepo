@@ -1,0 +1,11 @@
+# Terraform
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/*.tfvars
+infra/*.tfvars.json
+
+# CNAME file (generated during deployment, not committed)
+app/CNAME
+
