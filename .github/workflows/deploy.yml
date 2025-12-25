@@ -32,20 +32,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Generate CNAME file
+      - name: Get custom domain from GitHub Pages
+        id: get_cname
         run: |
-          # Generate CNAME file dynamically during deployment
-          # Avoids committing sensitive domain information to git
-          # Uses repository variable BASE_DOMAIN (set in repo Settings → Secrets and variables → Actions → Variables)
-          REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')
-          BASE_DOMAIN="${{ vars.BASE_DOMAIN }}"
-          if [ -z "$BASE_DOMAIN" ]; then
-            echo "Error: BASE_DOMAIN repository variable is not set"
-            echo "Please set it in: Repository Settings → Secrets and variables → Actions → Variables"
-            exit 1
+          # Get the custom domain from GitHub Pages API (already configured by Terraform)
+          CNAME=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pages" | \
+            jq -r '.cname // empty')
+          
+          if [ -z "$CNAME" ]; then
+            # Fallback: Generate from repository variable or use pattern
+            REPO_NAME=$(echo "${{ github.repository }}" | cut -d'/' -f2 | tr '[:upper:]' '[:lower:]')
+            BASE_DOMAIN="${{ vars.BASE_DOMAIN }}"
+            
+            if [ -z "$BASE_DOMAIN" ]; then
+              echo "Warning: No custom domain found in GitHub Pages and BASE_DOMAIN variable not set"
+              echo "Skipping CNAME file generation. Please either:"
+              echo "1. Run Terraform to configure the custom domain, OR"
+              echo "2. Set BASE_DOMAIN repository variable"
+              exit 0  # Don't fail, just skip CNAME generation
+            fi
+            CNAME="${REPO_NAME}.${BASE_DOMAIN}"
           fi
-          echo "${REPO_NAME}.${BASE_DOMAIN}" > app/CNAME
-          echo "Generated CNAME: ${REPO_NAME}.${BASE_DOMAIN}"
+          
+          echo "cname=${CNAME}" >> $GITHUB_OUTPUT
+          echo "Using custom domain: ${CNAME}"
+      
+      - name: Generate CNAME file
+        if: steps.get_cname.outputs.cname != ''
+        run: |
+          echo "${{ steps.get_cname.outputs.cname }}" > app/CNAME
+          echo "Generated CNAME: ${{ steps.get_cname.outputs.cname }}"
       
       - name: Setup Pages
         uses: actions/configure-pages@v5

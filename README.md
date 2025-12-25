@@ -90,7 +90,9 @@ Terraform automatically handles the custom domain setup:
 
 **No manual configuration needed in GitHub Pages settings** - Terraform does it for you when you apply!
 
-**Security Note:** The CNAME file is generated dynamically during GitHub Actions deployment and is not committed to the repository. You need to set a repository variable:
+**Security Note:** The CNAME file is generated dynamically during GitHub Actions deployment and is not committed to the repository. The workflow automatically reads the custom domain from GitHub Pages (configured by Terraform), so no manual setup is required!
+
+**Optional:** If Terraform hasn't run yet, you can set a repository variable `BASE_DOMAIN` as a fallback:
 - Go to: Repository Settings → Secrets and variables → Actions → Variables
 - Add variable: `BASE_DOMAIN` with your base domain (e.g., `example.com`)
 
