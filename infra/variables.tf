@@ -11,13 +11,13 @@ variable "repo_name" {
 }
 
 variable "base_domain" {
-  description = "Base domain for custom subdomain (e.g., arthurreira.dev)"
+  description = "Base domain for custom subdomain (e.g., example.com)"
   type        = string
-  default     = "arthurreira.dev"
+  default     = ""
 }
 
 variable "custom_domain" {
-  description = "Custom domain for GitHub Pages (e.g., app.arthurreira.dev). If not set, will auto-generate from repo_name"
+  description = "Custom domain for GitHub Pages (e.g., myapp.example.com). If not set, will auto-generate from repo_name as {lower(repo_name)}.{base_domain}"
   type        = string
   default     = ""
 }

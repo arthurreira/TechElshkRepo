@@ -68,20 +68,19 @@ The Terraform workflow runs on:
 - Check the **Actions** tab in GitHub to see workflow runs
 - Terraform outputs (like custom domain) are shown in the workflow logs
 
-### Security
-
-- Do not commit real tokens. Use env vars or untracked `.tfvars`.
-- Use `GITHUB_TOKEN` for read-only operations on this repo in CI.
-- Use a PAT when administrative actions are required.
 
 ## Custom Domain Setup
 
-This project is configured to use a custom subdomain like `app.arthurreira.dev` (where `app` is automatically generated from the repository name, or can be customized).
+This project automatically creates a custom subdomain using your **repository name** (lowercased). For example, if your repo is named `TechElshkRepo`, it will create `techelskrepo.your-domain.com`.
 
 ### How It Works
 
-- **Automatic Subdomain**: By default, the custom domain is generated as `${repo_name}.${base_domain}` (e.g., `techelskrepo.arthurreira.dev`)
+- **Automatic Subdomain**: By default, the custom domain is generated as `${lower(repo_name)}.${base_domain}`
+  - Repository name: `TechElshkRepo` → Subdomain: `techelskrepo.example.com`
+  - Repository name: `MyApp` → Subdomain: `myapp.example.com`
+  - The repository name is automatically lowercased for the subdomain
 - **Custom Subdomain**: You can override this by setting `custom_domain` variable in your `terraform.tfvars`
+- **Base Domain**: Configure your base domain in the `base_domain` variable (default can be set in `terraform.tfvars`)
 
 ### Terraform Configuration
 
@@ -93,20 +92,21 @@ The custom domain is configured in Terraform and a `CNAME` file is automatically
 
 After applying Terraform, you need to configure DNS with your domain registrar:
 
-1. **Log in to your domain registrar** (where you manage `arthurreira.dev`)
+1. **Log in to your domain registrar** (where you manage your base domain)
 
 2. **Add a CNAME record**:
    - **Type**: `CNAME`
-   - **Name/Host**: The subdomain part (e.g., `app` or `techelskrepo`)
-   - **Value/Points to**: `arthurreira.github.io`
+   - **Name/Host**: Your repository name in lowercase (e.g., if repo is `TechElshkRepo`, use `techelskrepo`)
+   - **Value/Points to**: `your-username.github.io` (replace `your-username` with your GitHub username)
    - **TTL**: 3600 (or your preferred value)
 
-   Example for `app.arthurreira.dev`:
+   Example: If your repository is named `TechElshkRepo` and base domain is `example.com`:
    ```
    Type: CNAME
-   Name: app
-   Value: arthurreira.github.io
+   Name: techelskrepo
+   Value: your-username.github.io
    ```
+   This will make your site available at `https://techelskrepo.example.com`
 
 3. **Wait for DNS propagation** (usually 5-60 minutes)
 
@@ -118,9 +118,9 @@ After applying Terraform, you need to configure DNS with your domain registrar:
 ### Testing
 
 Once DNS is configured, you can access your site at:
-- `https://app.arthurreira.dev` (or your configured subdomain)
+- `https://{lowercase-repo-name}.{base-domain}` (e.g., `https://techelskrepo.example.com` if repo is `TechElshkRepo`)
 
-The old GitHub Pages URL (`https://arthurreira.github.io/TechElshkRepo/`) will still work, but GitHub will automatically redirect to your custom domain once configured.
+The default GitHub Pages URL will still work, but GitHub will automatically redirect to your custom domain once configured.
 
 ### Troubleshooting
 
