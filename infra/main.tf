@@ -1,6 +1,9 @@
 locals {
   # Generate custom domain from repo name and base domain if not explicitly set
   custom_domain = var.custom_domain != "" ? var.custom_domain : "${lower(var.repo_name)}.${var.base_domain}"
+
+  # Extract GitHub owner from repository full_name (format: owner/repo)
+  github_owner = split("/", github_repository.site.full_name)[0]
 }
 
 resource "github_repository" "site" {
