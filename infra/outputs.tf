@@ -20,7 +20,7 @@ output "github_pages_url" {
 
 output "dns_instructions" {
   description = "DNS configuration instructions"
-  value = <<-EOT
+  value       = <<-EOT
     Configure DNS with your registrar:
     - Type: CNAME
     - Name: ${split(".", local.custom_domain)[0]}
