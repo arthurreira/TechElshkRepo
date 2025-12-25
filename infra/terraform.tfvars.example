@@ -1,0 +1,4 @@
+github_token = "ghp_your_personal_access_token_here"
+
+# Optional: override default repo name
+# repo_name    = "terraform-github-pages-demo"
